@@ -34,7 +34,7 @@ param
     [Parameter(Mandatory)]
     [string]$Entry,
 	
-	[Parameter(Mandatory)]
+    [Parameter(Mandatory)]
     [String]$Command,
 
     [Parameter()]
