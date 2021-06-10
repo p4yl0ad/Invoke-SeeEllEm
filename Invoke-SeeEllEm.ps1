@@ -105,11 +105,7 @@ Process{
     }
 }
 
-
-end{
 }
-}
-
 
 function Invoke-FileCreate {
     Write-Host $global:DllName
@@ -130,22 +126,30 @@ function dllmove{
 }
 
 function compile{
-     & $global:cscpath /platform:anycpu /reference:System.Management.Automation.dll /target:library /unsafe $global:srcfile
-     del $global:srcfile
+     & $global:cscpath /platform:anycpu /reference:System.Management.Automation.dll /target:library /unsafe $global:srcfile #evildll.cs
+     del $global:srcfile 
      toil
 }
 
 function toil{
-    #"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\ildasm.exe" /out:C:\rastalabs\ws05\SI0toSI1\linkedin.il C:\rastalabs\ws05\SI0toSI1\linkedin.dll
-    $global:patchdllname = "patched_" + $global:DllName + ".dll"
-    $global:DllNamedll = $global:srcfile = $global:DllName + ".dll"
-    & $global:ildasm /out:$global:patchdllname $global:DllNamedll
+    $global:patchilname = "patched_" + $global:DllName + ".il" #patched_evildll.il
+    $global:patchdllname = "patched_" + $global:DllName + ".dll" #patched_evildll.dll
+    $global:todel = "patched_" + $global:DllName + ".res"
+    $global:DllNamedll = $global:srcfile = $global:DllName + ".dll" #evildll.dll
+    & $global:ildasm /out:$global:patchilname $global:DllNamedll
+    del $global:todel
+    del $global:DllNamedll
     
-    break
+    if ($Build)
+    {
+        Write-Host "build"
+    }
+    else{
+        Write-Host "No build"
+    }
 
 }
 
-
 function recompile{
-	
+    & $global:ildasm $global:patchilname /DLL /output=$global:patchdllname
 }
