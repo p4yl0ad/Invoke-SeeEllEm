@@ -47,7 +47,7 @@ begin
 {
     $global:DllName = $DllName
     $global:Entry = $Entry
-    $global:Command = $Command
+    $global:Command = $Command.Replace("\","\\")
     $global:Build = $Build
 
     $global:src = @"
@@ -77,6 +77,7 @@ public class Program
 }
 "@
     $global:cscpath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+    $global:ilasm = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ilasm.exe"
     $global:ildasm = "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\ildasm.exe"
     $global:smadll = "C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll"
 }
@@ -126,18 +127,19 @@ function Invoke-DllMove{
 
 function Invoke-Compile{
      & $global:cscpath /platform:anycpu /reference:System.Management.Automation.dll /target:library /unsafe $global:srcfile #evildll.cs
-     del $global:srcfile 
+     #del $global:srcfile 
      Invoke-ToIl
 }
 
 function Invoke-ToIl{
     $global:patchilname = "patched_" + $global:DllName + ".il" #patched_evildll.il
+
     $global:patchdllname = "patched_" + $global:DllName + ".dll" #patched_evildll.dll
     $global:todel = "patched_" + $global:DllName + ".res"
     $global:DllNamedll = $global:srcfile = $global:DllName + ".dll" #evildll.dll
     & $global:ildasm /out:$global:patchilname $global:DllNamedll
-    del $global:todel
-    del $global:DllNamedll
+    #del $global:todel
+    #del $global:DllNamedll
     
     if ($Build)
     {
@@ -156,9 +158,9 @@ function Invoke-ToIl{
 
 function Invoke-EditExport{
     (gc $global:patchilname) -replace ".maxstack  2", ".export [1]`n`t$&" | sc $global:patchilname
-
 }
 
 function Invoke-Recompile{
-    & $global:ildasm $global:patchilname /DLL /output=$global:patchdllname
+    & $global:ilasm $global:patchilname /DLL /output=$global:patchdllname
+    Write-Host "rundll32.exe $global:patchdllname,$global:Entry"
 }
