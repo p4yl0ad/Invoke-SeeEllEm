@@ -108,8 +108,6 @@ Process{
 
 end{
 }
-
-
 }
 
 
@@ -117,21 +115,36 @@ function Invoke-FileCreate {
     Write-Host $global:DllName
     Write-Host $global:Entry
     Write-Host $global:Command
+	$global:fin = $src.Replace("{PEPEGA}",$Command)
+    Write-Host $global:fin
+    $global:fin2 = $global:fin.Replace("Exec",$Entry)
+	Write-Host $global:fin2
+    $global:srcfile = $global:DllName + ".cs"
+    $global:fin2 | Out-File $global:srcfile
+    dllmove
+}
 
-	$fin = $src.Replace("{PEPEGA}",$Command)
-	Write-Host $fin
-    $DllName = $global:DllName + ".txt"
-    $fin | Out-File $DllName
-    break
+function dllmove{
+    copy "C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll" .\System.Management.Automation.dll 
+    compile
 }
 
 function compile{
-	
+     & $global:cscpath /platform:anycpu /reference:System.Management.Automation.dll /target:library /unsafe $global:srcfile
+     del $global:srcfile
+     toil
 }
 
 function toil{
-	
+    #"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\ildasm.exe" /out:C:\rastalabs\ws05\SI0toSI1\linkedin.il C:\rastalabs\ws05\SI0toSI1\linkedin.dll
+    $global:patchdllname = "patched_" + $global:DllName + ".dll"
+    $global:DllNamedll = $global:srcfile = $global:DllName + ".dll"
+    & $global:ildasm /out:$global:patchdllname $global:DllNamedll
+    
+    break
+
 }
+
 
 function recompile{
 	
