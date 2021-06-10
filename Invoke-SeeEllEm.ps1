@@ -142,10 +142,10 @@ function Invoke-ToIl{
     }
     else{
         Invoke-EditExport
-        Write-Host "Convert to base64 using https://github.com/FortyNorthSecurity/CLM-Base64 "
+        Write-Host "#Convert to base64 using https://github.com/FortyNorthSecurity/CLM-Base64 "
         Write-Host "ipmo .\CLM-Base64.ps1; ConvertTo-Base64 -FilePath C:\pwd\evil.il | clip"
+	Write-Host "& C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ilasm.exe evil.il /DLL /output=evil-patched.dll"
     }
-
 }
 
 function Invoke-EditExport{
