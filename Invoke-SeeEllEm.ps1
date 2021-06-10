@@ -30,18 +30,13 @@ param
 (
     [Parameter()]
     [string]$DllName,
-	
     [Parameter(Mandatory)]
     [string]$Entry,
-	
     [Parameter(Mandatory)]
     [String]$Command,
-
     [Parameter()]
-    [switch]$Build
-				
+    [switch]$Build	
 )
-
 
 begin
 {
@@ -49,7 +44,6 @@ begin
     $global:Entry = $Entry
     $global:Command = $Command.Replace("\","\\")
     $global:Build = $Build
-
     $global:src = @"
 using System;
 using System.Configuration.Install;
@@ -81,7 +75,6 @@ public class Program
     $global:ildasm = "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\ildasm.exe"
     $global:smadll = "C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll"
 }
-
 
 Process{
     if (Test-Path $cscpath)
@@ -154,7 +147,6 @@ function Invoke-ToIl{
     }
 
 }
-
 
 function Invoke-EditExport{
     (gc $global:patchilname) -replace ".maxstack  2", ".export [1]`n`t$&" | sc $global:patchilname
