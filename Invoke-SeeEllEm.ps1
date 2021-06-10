@@ -120,7 +120,7 @@ function Invoke-DllMove{
 
 function Invoke-Compile{
      & $global:cscpath /platform:anycpu /reference:System.Management.Automation.dll /target:library /unsafe $global:srcfile #evildll.cs
-     #del $global:srcfile 
+     del $global:srcfile 
      Invoke-ToIl
 }
 
@@ -131,8 +131,8 @@ function Invoke-ToIl{
     $global:todel = "patched_" + $global:DllName + ".res"
     $global:DllNamedll = $global:srcfile = $global:DllName + ".dll" #evildll.dll
     & $global:ildasm /out:$global:patchilname $global:DllNamedll
-    #del $global:todel
-    #del $global:DllNamedll
+    del $global:todel
+    del $global:DllNamedll
     
     if ($Build)
     {
@@ -142,10 +142,10 @@ function Invoke-ToIl{
     }
     else{
         Invoke-EditExport
-        Write-Host "Convert to base64 using https://github.com/FortyNorthSecurity/CLM-Base64 "
+        Write-Host "#Convert to base64 using https://github.com/FortyNorthSecurity/CLM-Base64 "
         Write-Host "ipmo .\CLM-Base64.ps1; ConvertTo-Base64 -FilePath C:\pwd\evil.il | clip"
+	Write-Host "& C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ilasm.exe evil.il /DLL /output=evil-patched.dll"
     }
-
 }
 
 function Invoke-EditExport{
