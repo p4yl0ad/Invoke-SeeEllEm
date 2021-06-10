@@ -111,10 +111,10 @@ function Invoke-FileCreate {
     Write-Host $global:DllName
     Write-Host $global:Entry
     Write-Host $global:Command
-	$global:fin = $src.Replace("{PEPEGA}",$Command)
+    $global:fin = $src.Replace("{PEPEGA}",$Command)
     Write-Host $global:fin
     $global:fin2 = $global:fin.Replace("Exec",$Entry)
-	Write-Host $global:fin2
+    Write-Host $global:fin2
     $global:srcfile = $global:DllName + ".cs"
     $global:fin2 | Out-File $global:srcfile
     Invoke-DllMove
