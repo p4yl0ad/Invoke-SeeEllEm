@@ -5,7 +5,7 @@ function Create-AppIl
 	Generates a dll with an arbitary Entrypoint and powershell commands. 
 	Author: p4yl0ad (p4yl0ad@protonmail.com)  
 	License: BSD 3-Clause  
-	Required Dependencies: System.Management.Automation.dll in current working directory
+	Required Dependencies: csc.exe, ilasm.exe, ildasm.exe , powershell 3 installed
 
 .DESCRIPTION
 	Utilizes System.Management.Automation.Runspaces in order to create a powershell runspace
